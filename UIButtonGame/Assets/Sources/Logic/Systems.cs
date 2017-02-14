@@ -7,9 +7,9 @@ using System.Collections.Generic;
 /// Notify button listeners system. This system is tasked with notifying the
 /// button listeners in the pool whenever a PointsEntry event is created.
 /// </summary>
-public class NotifyButtonListenersSystem : ReactiveSystem {
+public sealed class NotifyButtonListenersSystem : ReactiveSystem<GameEntity> {
 
-	Group _listeners;
+	readonly IGroup<GameEntity> _listeners;
 
 	// Set the context for this system
 	public NotifyButtonListenersSystem (Contexts contexts) : base (contexts.game) {
@@ -17,17 +17,17 @@ public class NotifyButtonListenersSystem : ReactiveSystem {
 	}
 
 	// Get triggered by a component
-	protected override Collector GetTrigger (Context context) {
+	protected override Collector<GameEntity> GetTrigger (IContext<GameEntity> context) {
 		return context.CreateCollector (GameMatcher.PointsEntry, GroupEvent.Added);
 	}
 
 	// Filter the trigger component(s)
-	protected override bool Filter (Entity entity) {
+	protected override bool Filter (GameEntity entity) {
 		return entity.hasPointsEntry;
 	}
 
-	protected override void Execute (List<Entity> entities) {
-		
+	protected override void Execute (List<GameEntity> entities) {
+
 		foreach (var l in _listeners.GetEntities ()) {
 			int _id = entities [0].pointsEntry.buttonId;
 			l.buttonOffListener.value.ButtonOffEvent (_id);
@@ -35,24 +35,24 @@ public class NotifyButtonListenersSystem : ReactiveSystem {
 	}
 }
 
-public class PointsSystem : ReactiveSystem {
+public class PointsSystem : ReactiveSystem<GameEntity> {
 
-	Context _context;
+	readonly GameContext _context;
 
 	// Set the context
 	public PointsSystem (Contexts contexts) : base (contexts.game) {
 		_context = contexts.game;
 	}
 
-	protected override Collector GetTrigger (Context context) {
+	protected override Collector<GameEntity> GetTrigger (IContext<GameEntity> context) {
 		return context.CreateCollector (GameMatcher.PointsEntry, GroupEvent.Added);
 	}
 
-	protected override bool Filter (Entity entity) {
+	protected override bool Filter (GameEntity entity) {
 		return entity.hasPointsEntry;
 	}
 
-	protected override void Execute (List<Entity> entities)
+	protected override void Execute (List<GameEntity> entities)
 	{
 		int _curr = _context.points.currPoints;
 		int _max = _context.points.targetPoints;
@@ -63,25 +63,25 @@ public class PointsSystem : ReactiveSystem {
 	}
 }
 
-public class UpdateScoreTextSystem : ReactiveSystem {
-	
-	Context _context;
-	Group _listeners;
+public class UpdateScoreTextSystem : ReactiveSystem<GameEntity> {
+
+	readonly GameContext _context;
+	readonly IGroup<GameEntity> _listeners;
 
 	public UpdateScoreTextSystem (Contexts contexts) : base (contexts.game) {
 		_context = contexts.game;
 		_listeners = contexts.game.GetGroup (GameMatcher.ScoreListener);
 	}
 
-	protected override Collector GetTrigger (Context context) {
+	protected override Collector<GameEntity> GetTrigger (IContext<GameEntity> context) {
 		return context.CreateCollector (GameMatcher.Points, GroupEvent.AddedOrRemoved);
 	}
 
-	protected override bool Filter (Entity entity) {
+	protected override bool Filter (GameEntity entity) {
 		return entity.hasPoints;
 	}
 
-	protected override void Execute (List<Entity> entities)
+	protected override void Execute (List<GameEntity> entities)
 	{
 		foreach (var l in _listeners.GetEntities ()) {
 			l.scoreListener.value.UpdateScoreText (_context.points.currPoints, _context.points.targetPoints);
@@ -89,25 +89,25 @@ public class UpdateScoreTextSystem : ReactiveSystem {
 	}
 }
 
-public class VictoryCheckSystem : ReactiveSystem {
+public class VictoryCheckSystem : ReactiveSystem<GameEntity> {
 
-	Context _context;
-	Group _listeners;
+	readonly GameContext _context;
+	readonly IGroup<GameEntity> _listeners;
 
 	public VictoryCheckSystem (Contexts contexts) : base (contexts.game) {
 		_context = contexts.game;
 		_listeners = contexts.game.GetGroup (GameMatcher.ButtonOffListener);
 	}
 
-	protected override Collector GetTrigger (Context context) {
+	protected override Collector<GameEntity> GetTrigger (IContext<GameEntity> context) {
 		return context.CreateCollector (GameMatcher.Points, GroupEvent.AddedOrRemoved);
 	}
 
-	protected override bool Filter (Entity entity) {
+	protected override bool Filter (GameEntity entity) {
 		return entity.hasPoints;
 	}
 
-	protected override void Execute (List<Entity> entities)
+	protected override void Execute (List<GameEntity> entities)
 	{
 		int _curr = _context.points.currPoints;
 		int _max = _context.points.targetPoints;

@@ -16,12 +16,14 @@ public class ButtonClickBehaviour : MonoBehaviour, ButtonOffListener {
 	// This script's listener is added to the pool at the start of the game
 	void Start () {
 		_pointsText.text = _points.ToString ();
+		//GameContext.CreateEntity ().AddButtonOffListener (this);
 		Contexts.sharedInstance.game.CreateEntity ().AddButtonOffListener (this);
 	}
 
 	// Function that is called when the player clicks the button
 	public void ButtonClick ()
 	{
+		//GameContext.CreateEntity ().AddPointsEntry (_points, _thisID);
 		Contexts.sharedInstance.game.CreateEntity ().AddPointsEntry (_points, _thisID);
 	}
 

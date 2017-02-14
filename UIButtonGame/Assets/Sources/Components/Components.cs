@@ -1,5 +1,5 @@
 ﻿using Entitas;
-using Entitas.CodeGenerator;
+using Entitas.CodeGenerator.Api;
 using System.Collections.Generic;
 
 /// <summary>
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// The SingleEntity attribute is used to make sure there is only one instance
 /// of this component in the whole project. Requires Entitas.CodeGenerator.
 /// </summary>
-[Game, SingleEntity]
+[Game, Unique]
 public sealed class PointsComponent : IComponent {
 	public int currPoints;
 	public int targetPoints;
